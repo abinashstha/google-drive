@@ -1,13 +1,26 @@
 {
-  "name": "react-google-drive-tutorial",
+  "name": "npm-test-as",
+  "author": "Abinash Shrestha",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jawblia/npm-test.git"
+  },
   "dependencies": {
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "antd": "^4.4.1",
     "gapi-script": "^1.0.2",
+    "google-auth-library": "^8.0.3",
+    "googleapis": "^104.0.0",
     "lodash": "^4.17.19",
     "moment": "^2.27.0",
     "react": "^16.13.1",
@@ -18,7 +31,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "rm -rf dist && NODE_ENV=production babel src/lib --out-dir dist --copy-files",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint .",
@@ -46,6 +59,9 @@
     ]
   },
   "devDependencies": {
+    "@babel/cli": "^7.18.9",
+    "@babel/core": "^7.18.9",
+    "@babel/preset-env": "^7.18.9",
     "babel-eslint": "^10.1.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",

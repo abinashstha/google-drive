@@ -5,6 +5,9 @@ import { gapi } from 'gapi-script';
 import GoogleDriveImage from '../../assets/images/google-drive.png';
 import ListDocuments from '../ListDocuments';
 import { style } from './styles';
+import { GoogleAuth } from 'google-auth-library';
+import { google } from 'googleapis';
+import { fs } from 'fs';
 
 const NewDocumentWrapper = styled.div`
   ${style}
@@ -26,6 +29,7 @@ const SelectSource = () => {
   const [documents, setDocuments] = useState([]);
   const [isLoadingGoogleDriveApi, setIsLoadingGoogleDriveApi] = useState(false);
   const [isFetchingGoogleDriveFiles, setIsFetchingGoogleDriveFiles] = useState(false);
+  const [isUploadingGoogleDriveFiles, setIsUploadingGoogleDriveFiles] = useState(false);
   const [signedInUser, setSignedInUser] = useState();
   const handleChange = (file) => {};
 
@@ -42,6 +46,47 @@ const SelectSource = () => {
       })
       .then(function (response) {
         setIsFetchingGoogleDriveFiles(false);
+        setListDocumentsVisibility(true);
+        const res = JSON.parse(response.body);
+        setDocuments(res.files);
+      });
+  };
+  async function uploadBasic() {
+    // Get credentials and build service
+    // TODO (developer) - Use appropriate auth mechanism for your app
+    const auth = new GoogleAuth({ scopes: 'https://www.googleapis.com/auth/drive' });
+    const service = google.drive({ version: 'v3', auth });
+    const fileMetadata = {
+      title: 'photo.jpg',
+    };
+    const media = {
+      mimeType: 'image/jpeg',
+      body: fs.createReadStream('files/photo.jpg'),
+    };
+    try {
+      const file = await service.files.create({
+        resource: fileMetadata,
+        media: media,
+        fields: 'id',
+      });
+      // console.log('File Id:', file.data.id);
+      return file.data.id;
+    } catch (err) {
+      // TODO(developer) - Handle error
+      throw err;
+    }
+  }
+  const uploadFiles = (searchTerm = null) => {
+    setIsUploadingGoogleDriveFiles(true);
+    // POST https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable
+    gapi.client.drive.files
+      .list({
+        pageSize: 10,
+        fields: 'nextPageToken, files(id, name, mimeType, modifiedTime)',
+        q: searchTerm,
+      })
+      .then(function (response) {
+        setIsUploadingGoogleDriveFiles(false);
         setListDocumentsVisibility(true);
         const res = JSON.parse(response.body);
         setDocuments(res.files);
@@ -143,6 +188,7 @@ const SelectSource = () => {
               </div>
             </div>
           </Spin>
+          <button>Upload</button>
         </Col>
       </Row>
     </NewDocumentWrapper>
